@@ -1,0 +1,8 @@
+from django.urls import path
+from .views import MovieView, MovieDetailView, TrailerDetailView
+
+urlpatterns = [
+    path('', MovieView.as_view(), name='movie_list_create'),
+    path('<int:pk>/', MovieDetailView.as_view(), name='movie_list_detail'),
+    path('trailer/<int:pk>/', TrailerDetailView.as_view(), name='trailer_detail'),
+] 
