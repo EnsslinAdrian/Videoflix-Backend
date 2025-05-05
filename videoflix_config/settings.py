@@ -30,8 +30,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "api.adrianensslin.de"
-    "adrianensslin.de"
+    "api.adrianensslin.de",
+    "adrianensslin.de",
 ]
 
 CORS_ALLOWED_ORIGINS = [
