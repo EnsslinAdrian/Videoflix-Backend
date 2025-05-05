@@ -35,14 +35,22 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+<<<<<<< HEAD
     "https://api.adrianensslin.de",  
+=======
+    "https://api.adrianensslin.de",
+>>>>>>> ede9bd0 (Server: Anpassung von ALLOWED_HOSTS und CORS)
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:4200",
+<<<<<<< HEAD
     "https://api.adrianensslin.de",  
+=======
+    "https://api.adrianensslin.de",
+>>>>>>> ede9bd0 (Server: Anpassung von ALLOWED_HOSTS und CORS)
 ]
 
 
