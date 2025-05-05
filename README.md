@@ -1,84 +1,109 @@
-# Videoflix Backend – Lokale Entwicklungsanleitung
 
-Willkommen im Videoflix-Backend! Diese Anleitung erklärt dir (oder anderen Entwicklern), wie du das Projekt lokal zum Laufen bringst – inklusive PostgreSQL, Redis (Docker), Django & RQ Worker.
+# 🎬 Videoflix Backend – Installationsanleitung
 
----
+Willkommen im **Videoflix Backend**!
 
-## 📦 Voraussetzungen
-
-Stelle sicher, dass du folgendes installiert hast:
-
-- Python 3.x
-- PostgreSQL (über `apt install postgresql`)
-- Docker Desktop (läuft im Hintergrund)
-- Virtuelle Umgebung eingerichtet (`env/`)
+Diese Anleitung erklärt Schritt für Schritt, wie du das Backend lokal auf einem Ubuntu- oder WSL-System installierst und startest. Nach dieser Anleitung läuft dein Projekt mit PostgreSQL, Redis, Django, RQ Worker und einer .env Konfigurationsdatei.
 
 ---
 
-## 🚀 Projekt das erste Mal starten
+## 📝 Voraussetzungen
 
-### 1. Repository klonen
+Bitte installiere:
 
 ```bash
-git clone <dein-repo-link>
+sudo apt update
+sudo apt install python3 python3-venv python3-pip postgresql postgresql-contrib redis git
+```
+
+Optional: Docker (nur wenn du Redis lieber in Docker starten willst).
+
+---
+
+## 🚀 Projekt klonen
+
+```bash
+git clone <DEIN-REPOSITORY-LINK>
 cd videoflix_backend
 ```
 
-### 2. Virtuelle Umgebung erstellen und aktivieren
+---
+
+## 🐍 Virtuelle Umgebung einrichten
 
 ```bash
 python3 -m venv env
 source env/bin/activate
 ```
 
-### 3. Abhängigkeiten installieren
+---
+
+## 📦 Abhängigkeiten installieren
 
 ```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 ---
 
-## 🐘 PostgreSQL starten (Linux / WSL)
+## 🐘 PostgreSQL-Datenbank einrichten
+
+1. PostgreSQL starten:
 
 ```bash
 sudo service postgresql start
 ```
 
-Stelle sicher, dass deine Datenbankverbindung in `settings.py` korrekt ist (z. B. Benutzername, Passwort, DB-Name etc.).
+2. PostgreSQL-Konsole öffnen:
+
+```bash
+sudo -u postgres psql
+```
+
+3. Neuen Benutzer & Datenbank erstellen:
+
+```sql
+CREATE DATABASE videoflix_db;
+CREATE USER videoflix_user WITH PASSWORD 'sicheres_passwort';
+ALTER ROLE videoflix_user SET client_encoding TO 'utf8';
+ALTER ROLE videoflix_user SET default_transaction_isolation TO 'read committed';
+GRANT ALL PRIVILEGES ON DATABASE videoflix_db TO videoflix_user;
+\q
+```
+
+Merken: Benutzername: `videoflix_user`, Passwort: `sicheres_passwort`
 
 ---
 
-## 🐳 Redis mit Docker starten
+## ⚙️ .env Datei erstellen
 
-### Nur beim **ersten Mal**:
-
-```bash
-docker run --name redis-local -p 6379:6379 -d redis redis-server --requirepass foobared
-```
-
-### Danach (bei jedem Start):
+Im Projektverzeichnis eine Datei `.env` erstellen:
 
 ```bash
-docker start redis-local
+touch .env
 ```
 
----
+Inhalt der .env:
 
-## ⚙️ Einstellungen prüfen
+```plaintext
+DB_NAME=videoflix_db
+DB_USER=videoflix_user
+DB_PASSWORD=sicheres_passwort
+DB_HOST=localhost
+DB_PORT=5432
 
-In `settings.py`:
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=foobared
 
-```python
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': 'foobared',
-        'DEFAULT_TIMEOUT': 360,
-    }
-}
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=dein_emailbenutzer
+EMAIL_PASSWORD=dein_emailpasswort
+EMAIL_USE_TLS=True
+
+SECRET_KEY=dein_geheimer_schlüssel
 ```
 
 ---
@@ -91,7 +116,7 @@ python manage.py migrate
 
 ---
 
-## 🧪 Superuser erstellen (falls nötig)
+## 🧪 Superuser erstellen
 
 ```bash
 python manage.py createsuperuser
@@ -105,7 +130,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-App erreichbar unter: [http://localhost:8000](http://localhost:8000)
+Die App ist dann erreichbar unter: [http://localhost:8000](http://localhost:8000)
 
 ---
 
@@ -118,46 +143,16 @@ python manage.py rqworker default
 
 ---
 
-## 🔁 Nützliche Docker-Befehle
+## 🔁 Redis-Befehle (falls benötigt)
 
-Redis stoppen:
-
-```bash
-docker stop redis-local
-```
-
-Redis neu starten:
+Redis starten (falls noch nicht läuft):
 
 ```bash
-docker start redis-local
-```
-
-Redis-Container löschen:
-
-```bash
-docker rm -f redis-local
-```
-
----
-
-## 🧪 Test-Task
-
-```python
-# tasks.py
-def say_hello():
-    print("Hello from RQ!")
-    return "done"
-```
-
-```python
-# in shell
-from django_rq import enqueue
-from your_app.tasks import say_hello
-enqueue(say_hello)
+sudo service redis-server start
 ```
 
 ---
 
 ## ✅ Bereit!
 
-Wenn du alles oben gemacht hast, ist dein Projekt bereit für die Entwicklung.
+Wenn du alle Schritte ausgeführt hast, sollte dein Backend laufen und bereit für die Entwicklung und Tests sein.
