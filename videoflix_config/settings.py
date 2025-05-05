@@ -31,10 +31,12 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "api.adrianensslin.de"
+    "adrianensslin.de"
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "https://adrianensslin.de",  
     "https://api.adrianensslin.de",  
 ]
 
@@ -42,6 +44,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:4200",
+    "https://adrianensslin.de",  
     "https://api.adrianensslin.de",  
 ]
 
@@ -182,8 +185,13 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
+# Localhost URLs for development
 FRONTEND_VERIFY_URL = "http://localhost:4200/email-verify"
 FRONTEND_RESET_URL = "http://localhost:4200/new-password"
+
+# Production URLs for deployment
+# FRONTEND_VERIFY_URL = "https://adrianensslin.de/email-verify"
+# FRONTEND_RESET_URL = "https://adrianensslin.de//new-password"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
