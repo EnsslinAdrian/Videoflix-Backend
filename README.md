@@ -1,158 +1,148 @@
 
-# 🎬 Videoflix Backend – Installationsanleitung
+# Videoflix Backend
 
-Willkommen im **Videoflix Backend**!
+Ein Django-basiertes Backend für Video-Streaming mit automatischer HLS-Konvertierung und Hintergrundprozessen über Redis Queue (RQ).
 
-Diese Anleitung erklärt Schritt für Schritt, wie du das Backend lokal auf einem Ubuntu- oder WSL-System installierst und startest. Nach dieser Anleitung läuft dein Projekt mit PostgreSQL, Redis, Django, RQ Worker und einer .env Konfigurationsdatei.
+## Voraussetzungen
 
----
+- Python 3.13.1
+- PostgreSQL
+- Redis
+- ffmpeg
+- supervisor (für Produktionsumgebungen)
 
-## 📝 Voraussetzungen
+## Installation
 
-Bitte installiere:
+### 1️⃣ Repository klonen
 
 ```bash
-sudo apt update
-sudo apt install python3 python3-venv python3-pip postgresql postgresql-contrib redis git
+git clone <REPOSITORY-URL>
+cd Videoflix-Backend
 ```
 
-Optional: Docker (nur wenn du Redis lieber in Docker starten willst).
-
----
-
-## 🚀 Projekt klonen
+### 2️⃣ Virtuelle Umgebung erstellen und aktivieren
 
 ```bash
-git clone <DEIN-REPOSITORY-LINK>
-cd videoflix_backend
-```
-
----
-
-## 🐍 Virtuelle Umgebung einrichten
-
-```bash
-python3 -m venv env
+python -m venv env
 source env/bin/activate
 ```
 
----
-
-## 📦 Abhängigkeiten installieren
+### 3️⃣ Abhängigkeiten installieren
 
 ```bash
-pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
----
+### 4️⃣ PostgreSQL-Datenbank erstellen
 
-## 🐘 PostgreSQL-Datenbank einrichten
-
-1. PostgreSQL starten:
-
-```bash
-sudo service postgresql start
-```
-
-2. PostgreSQL-Konsole öffnen:
+Eine neue Datenbank namens `videoflix` und einen Benutzer mit Passwort erstellen. Beispiel:
 
 ```bash
 sudo -u postgres psql
-```
-
-3. Neuen Benutzer & Datenbank erstellen:
-
-```sql
-CREATE DATABASE videoflix_db;
-CREATE USER videoflix_user WITH PASSWORD 'sicheres_passwort';
-ALTER ROLE videoflix_user SET client_encoding TO 'utf8';
-ALTER ROLE videoflix_user SET default_transaction_isolation TO 'read committed';
-GRANT ALL PRIVILEGES ON DATABASE videoflix_db TO videoflix_user;
+CREATE DATABASE videoflix;
+CREATE USER dein_user WITH PASSWORD 'dein_passwort';
+GRANT ALL PRIVILEGES ON DATABASE videoflix TO dein_user;
 \q
 ```
 
-Merken: Benutzername: `videoflix_user`, Passwort: `sicheres_passwort`
+## .env Datei erstellen
 
----
+Im Hauptverzeichnis eine Datei `.env` anlegen:
 
-## ⚙️ .env Datei erstellen
+```ini
+DB_NAME = 'videoflix'
+DB_USER = 'dein_user'
+DB_PASSWORD = 'dein_passwort'
 
-Im Projektverzeichnis eine Datei `.env` erstellen:
+REDIS_PASSWORD = 'dein_redis_passwort'  # Falls nötig
 
-```bash
-touch .env
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.web.de'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'deine_email'
+EMAIL_HOST_PASSWORD = 'dein_email_passwort'
+DEFAULT_FROM_EMAIL = 'Videoflix <deine_email>'
+
+SECRET_KEY = 'dein_secret_key'
 ```
 
-Inhalt der .env:
+## Django vorbereiten
 
-```plaintext
-DB_NAME=videoflix_db
-DB_USER=videoflix_user
-DB_PASSWORD=sicheres_passwort
-DB_HOST=localhost
-DB_PORT=5432
-
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=foobared
-
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USER=dein_emailbenutzer
-EMAIL_PASSWORD=dein_emailpasswort
-EMAIL_USE_TLS=True
-
-SECRET_KEY=dein_geheimer_schlüssel
-```
-
----
-
-## 🛠 Migrationen durchführen
+### 5️⃣ Migrationen ausführen
 
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 ```
 
----
-
-## 🧪 Superuser erstellen
+### 6️⃣ Superuser anlegen
 
 ```bash
 python manage.py createsuperuser
 ```
 
----
+### 7️⃣ Statische Dateien sammeln
 
-## 🌐 Django starten
+```bash
+python manage.py collectstatic
+```
+
+## ffmpeg installieren (wenn noch nicht installiert)
+
+Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+## Redis installieren (wenn lokal)
+
+```bash
+sudo apt install redis
+sudo systemctl enable redis
+sudo systemctl start redis
+```
+
+## Entwicklungsserver starten
 
 ```bash
 python manage.py runserver
 ```
 
-Die App ist dann erreichbar unter: [http://localhost:8000](http://localhost:8000)
-
----
-
-## 🧵 RQ Worker starten (zweites Terminal)
+## Redis Queue Worker starten
 
 ```bash
-source env/bin/activate
-python manage.py rqworker default
+python manage.py rqworker
 ```
 
----
+## Supervisor Beispiel (für RQ Worker in Produktion)
 
-## 🔁 Redis-Befehle (falls benötigt)
+Datei: `videoflix_rqworker.conf`
 
-Redis starten (falls noch nicht läuft):
+```ini
+[program:videoflix_rqworker]
+command=/PFAD/ZUM/env/bin/python /PFAD/ZUM/manage.py rqworker
+directory=/PFAD/ZUM/Videoflix-Backend
+user=DEIN_USER
+autostart=true
+autorestart=true
+stdout_logfile=/var/log/rqworker.log
+stderr_logfile=/var/log/rqworker_error.log
+```
+
+Nach dem Anlegen:
 
 ```bash
-sudo service redis-server start
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start videoflix_rqworker
 ```
 
----
+## Wichtige Hinweise
 
-## ✅ Bereit!
+- Vor dem Start des Projekts sicherstellen, dass PostgreSQL und Redis laufen.
+- Der Ordner `media/` speichert hochgeladene Videos und Cover. Dieser Ordner sollte existieren oder automatisch erstellt werden.
+- Videodateien sollten im MP4-Format hochgeladen werden.
 
-Wenn du alle Schritte ausgeführt hast, sollte dein Backend laufen und bereit für die Entwicklung und Tests sein.

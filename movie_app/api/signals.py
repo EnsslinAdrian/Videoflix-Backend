@@ -6,6 +6,7 @@ from django.core.cache import cache
 
 import os
 import django_rq
+import glob
 import shutil
 
 @receiver(post_save, sender=Movie)
@@ -31,10 +32,10 @@ def movie_post_save(sender, instance, created, **kwargs):
         instance.save()
 
         queue = django_rq.get_queue('default', autocommit=True)
-
-        queue.enqueue(convert_480p, instance.movie_url.path, timeout=600)
-        queue.enqueue(convert_720p, instance.movie_url.path, timeout=900)
-        queue.enqueue(convert_1080p, instance.movie_url.path, timeout=1800)
+        queue.enqueue(convert_480p, instance.movie_url.path)
+        queue.enqueue(convert_720p, instance.movie_url.path)
+        queue.enqueue(convert_1080p, instance.movie_url.path)
+        
 
 @receiver(post_delete, sender=Movie)
 def auto_delete_file_on_delete(sender, instance, *args, **kwargs):
@@ -48,5 +49,3 @@ def auto_delete_file_on_delete(sender, instance, *args, **kwargs):
             for name in dirs:
                 os.rmdir(os.path.join(root, name))
         os.rmdir(movie_dir)
-
-CACHE_TTL = 60 * 15
