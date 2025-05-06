@@ -57,5 +57,3 @@ def convert_1080p(source):
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     print(result.stdout)
     print(result.stderr)
-
-
