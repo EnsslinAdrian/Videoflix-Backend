@@ -11,6 +11,17 @@ import shutil
 
 @receiver(post_save, sender=Movie)
 def movie_post_save(sender, instance, created, **kwargs):
+    """
+    Signal handler for Movie model post-save.
+
+    - Clears the cache.
+    - If the movie was newly created:
+        - Moves uploaded movie and cover to a structured folder.
+        - Updates the file paths in the instance.
+        - Creates the target directory if it doesn't exist.
+        - Enqueues video conversion tasks (480p, 720p, 1080p) to RQ.
+    """
+
     cache.clear()
     movie_dir = os.path.join("media/movies", str(instance.id))
 
@@ -39,6 +50,13 @@ def movie_post_save(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Movie)
 def auto_delete_file_on_delete(sender, instance, *args, **kwargs):
+    """
+    Signal handler for Movie model post-delete.
+
+    - Clears the cache.
+    - Deletes all video and cover files associated with the movie.
+    - Removes the entire movie directory if it exists.
+    """
     cache.clear()
 
     movie_dir = os.path.dirname(instance.movie_url.path)

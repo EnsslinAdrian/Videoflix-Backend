@@ -2,6 +2,19 @@ import os
 import subprocess
 
 def convert_480p(source):
+    """
+    Converts the given video file to 480p HLS format using FFmpeg.
+
+    Args:
+        source (str): Path to the source video file.
+
+    Output:
+        Creates an HLS playlist file (480p.m3u8) and multiple .ts segment files 
+        in the same directory as the source video.
+
+    Note:
+        Requires FFmpeg to be installed and available in the system PATH.
+    """
     output_dir = os.path.dirname(source)
     target = os.path.join(output_dir, "480p.m3u8")
     ts_pattern = os.path.join(output_dir, "480p_%03d.ts")
@@ -21,6 +34,16 @@ def convert_480p(source):
     print(result.stderr)
 
 def convert_720p(source):
+    """
+    Converts the given video file to 720p HLS format using FFmpeg.
+
+    Args:
+        source (str): Path to the source video file.
+
+    Output:
+        Creates a 720p.m3u8 playlist and corresponding .ts segment files 
+        in the same directory as the source video.
+    """
     output_dir = os.path.dirname(source)
     target = os.path.join(output_dir, "720p.m3u8")
     ts_pattern = os.path.join(output_dir, "720p_%03d.ts")
@@ -40,6 +63,16 @@ def convert_720p(source):
     print(result.stderr)
 
 def convert_1080p(source):
+    """
+    Converts the given video file to 1080p HLS format using FFmpeg.
+
+    Args:
+        source (str): Path to the source video file.
+
+    Output:
+        Creates a 1080p.m3u8 playlist and corresponding .ts segment files 
+        in the same directory as the source video.
+    """
     output_dir = os.path.dirname(source)
     target = os.path.join(output_dir, "1080p.m3u8")
     ts_pattern = os.path.join(output_dir, "1080p_%03d.ts")

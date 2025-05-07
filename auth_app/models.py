@@ -2,6 +2,10 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
+    """
+    Custom user model that uses email as the username field.
+    Includes first and last name, and standard user flags.
+    """
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("Email ist erforderlich")
@@ -17,6 +21,19 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    """
+    CustomUser model that extends AbstractBaseUser and PermissionsMixin.
+    Attributes:
+        email (EmailField): The unique email address used for authentication.
+        first_name (CharField): Optional first name of the user.
+        last_name (CharField): Optional last name of the user.
+        is_active (BooleanField): Indicates whether the user account is active.
+        is_staff (BooleanField): Indicates whether the user has staff privileges.
+        date_joined (DateTimeField): Timestamp of when the user account was created.
+    Meta:
+        USERNAME_FIELD (str): Field used as the unique identifier for authentication.
+        REQUIRED_FIELDS (list): Additional fields required for user creation.
+    """
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)

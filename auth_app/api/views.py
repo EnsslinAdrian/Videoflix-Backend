@@ -25,6 +25,12 @@ signer = TimestampSigner()
 User = get_user_model()
 
 class RegisterView(APIView):
+    """
+    Handles user registration:
+    - Validates input
+    - Creates a new user
+    - Sends a verification email
+    """
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -49,6 +55,14 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=400)
 
 class VerifyEmailView(APIView):
+    """
+    Handles email verification for user accounts.
+
+    Methods:
+        get(request):
+            Verifies the email using a token from query parameters.
+            Activates the user account if the token is valid.
+    """
     def get(self, request):
         token = request.query_params.get("token")
         try:
@@ -65,6 +79,12 @@ class VerifyEmailView(APIView):
             return Response({"message": f"Internal server error: {str(e)}"}, status=500)
 
 class PasswordResetConfirmView(APIView):
+    """
+    Handles password reset confirmation requests.
+    Methods:
+        post(request):
+            Validates the provided UID and token, and updates the user's password if valid.
+    """
     def post(self, request):
         uid = request.data.get('uid')
         token = request.data.get('token')
@@ -84,6 +104,13 @@ class PasswordResetConfirmView(APIView):
             return Response({"message": "Error resetting the password."}, status=400)
 
 class PasswordResetRequestView(APIView):
+    """
+    Handles password reset requests by sending a reset email to the user.
+    Methods:
+        post(request):
+            Processes the password reset request, generates a reset token,
+            and sends an email with the reset link to the provided email address.
+    """
     def post(self, request):
         email = request.data.get('email')
         try:
@@ -111,6 +138,14 @@ class PasswordResetRequestView(APIView):
             return Response({"message": "No account is associated with this email address."}, status=400)
 
 class CustomLoginView(TokenObtainPairView):
+    """
+    Custom login view for handling user authentication and token generation.
+    Methods:
+        post(request, *args, **kwargs):
+            Handles POST requests for user login, validates credentials, 
+            generates access and refresh tokens, and sets the refresh token 
+            as an HTTP-only cookie.
+    """
     def post(self, request, *args, **kwargs):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -151,6 +186,13 @@ class CustomLoginView(TokenObtainPairView):
         return response
 
 class RefreshAccessTokenView(APIView):  
+    """
+    Handles the generation of a new access token using a refresh token.
+    Methods:
+        post(request):
+            Validates the refresh token from cookies and generates a new access token.
+            Returns an error response if the refresh token is invalid or expired.
+    """
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
@@ -174,12 +216,26 @@ class RefreshAccessTokenView(APIView):
             return Response({'detail': 'Invalid or expired refresh token.'}, status=401)
 
 class LogoutView(APIView):
+    """
+    Handles user logout by deleting the refresh token cookie.
+
+    Methods:
+        post(request):
+            Deletes the 'refresh_token' cookie and returns a success message.
+    """
     def post(self, request):
         response = Response({"message": "Successfully logged out"})
         response.delete_cookie("refresh_token", path="/", samesite="None")
         return response
 
 class AuthStatusView(APIView):
+    """
+    View to check the authentication status of a user.
+    Methods:
+        get(request):
+            Handles GET requests to verify if the user is authenticated
+            based on the presence and validity of a refresh token in cookies.
+    """
     permission_classes = [AllowAny]
 
     def get(self, request):
@@ -199,6 +255,14 @@ class AuthStatusView(APIView):
             return Response({"authenticated": False}, status=200)
         
 class MeUserView(APIView):
+    """
+    API view to handle operations related to the authenticated user.
+    Methods:
+        get(request):
+            Retrieve the authenticated user's details including id, email, first name, and last name.
+        put(request):
+            Update the authenticated user's first name and/or last name if provided in the request data.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

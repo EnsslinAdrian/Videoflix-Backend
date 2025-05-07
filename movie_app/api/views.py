@@ -13,16 +13,27 @@ CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 @method_decorator(cache_page(CACHE_TTL), name='get')
 class MovieView(generics.ListCreateAPIView):
+    """
+    API view to list all movies or create a new movie.
+
+    GET requests are cached to improve performance.
+    """
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     permission_classes = [AllowAny]
 
 class MovieDetailView(generics.RetrieveAPIView):
+    """
+    API view to retrieve details of a single movie.
+    """
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     permission_classes = [AllowAny]
 
 class TrailerDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API view to retrieve, update, or delete a trailer instance.
+    """
     queryset = Trailer.objects.all()
     serializer_class = TrailerSerializer
     permission_classes = [AllowAny]
