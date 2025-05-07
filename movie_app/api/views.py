@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from .serializers import MovieSerializer, TrailerSerializer
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAdminUser, AllowAny
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
@@ -20,7 +20,7 @@ class MovieView(generics.ListCreateAPIView):
     """
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 class MovieDetailView(generics.RetrieveAPIView):
     """
@@ -28,7 +28,7 @@ class MovieDetailView(generics.RetrieveAPIView):
     """
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
 class TrailerDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -36,4 +36,4 @@ class TrailerDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Trailer.objects.all()
     serializer_class = TrailerSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
