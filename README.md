@@ -65,6 +65,7 @@ EMAIL_HOST_PASSWORD = 'dein_email_passwort'
 DEFAULT_FROM_EMAIL = 'Videoflix <deine_email>'
 
 SECRET_KEY = 'dein_secret_key'
+DEBUG = True
 ```
 
 ## Django vorbereiten
