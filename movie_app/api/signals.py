@@ -47,6 +47,39 @@ def movie_post_save(sender, instance, created, **kwargs):
         queue.enqueue(convert_720p, instance.movie_url.path)
         queue.enqueue(convert_1080p, instance.movie_url.path)
         
+def create_master_playlist(movie_dir):
+    """
+    Erstellt eine Master-Playlist (master.m3u8) für ein gegebenes Verzeichnis mit Video-Playlists.
+    Diese Funktion überprüft, ob Playlists für verschiedene Auflösungen (480p, 720p, 1080p) 
+    im angegebenen Verzeichnis vorhanden sind, und erstellt eine Master-Playlist, die 
+    diese Varianten referenziert.
+    Args:
+        movie_dir (str): Der Pfad zum Verzeichnis, das die Video-Playlists enthält.
+    Returns:
+        None: Gibt nichts zurück, erstellt jedoch eine Datei 'master.m3u8' im Verzeichnis, 
+        falls Varianten gefunden werden.
+    """
+    master_path = os.path.join(movie_dir, "master.m3u8")
+
+    variants = []
+    if os.path.exists(os.path.join(movie_dir, "480p.m3u8")):
+        variants.append(('480p.m3u8', 600000, '854x480'))
+    if os.path.exists(os.path.join(movie_dir, "720p.m3u8")):
+        variants.append(('720p.m3u8', 1400000, '1280x720'))
+    if os.path.exists(os.path.join(movie_dir, "1080p.m3u8")):
+        variants.append(('1080p.m3u8', 2800000, '1920x1080'))
+
+    if not variants:
+        print("Keine Varianten gefunden. Master.m3u8 wird nicht erstellt.")
+        return
+
+    with open(master_path, "w") as f:
+        f.write("#EXTM3U\n")
+        for filename, bandwidth, resolution in variants:
+            f.write(f'#EXT-X-STREAM-INF:BANDWIDTH={bandwidth},RESOLUTION={resolution}\n')
+            f.write(f"{filename}\n")
+
+    print(f"Master-Playlist erstellt: {master_path}")
 
 @receiver(post_delete, sender=Movie)
 def auto_delete_file_on_delete(sender, instance, *args, **kwargs):

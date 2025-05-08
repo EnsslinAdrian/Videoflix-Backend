@@ -16,7 +16,7 @@ class MovieSerializer(serializers.ModelSerializer):
     def get_movie_url(self, obj):
         request = self.context.get('request')
         if obj.movie_url:
-            url = obj.movie_url.url.replace("original.mp4", "1080p.m3u8")
+            url = obj.movie_url.url.replace("original.mp4", "master.m3u8")
             return request.build_absolute_uri(url)
         return None
 
